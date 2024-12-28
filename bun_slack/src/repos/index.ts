@@ -1,0 +1,1 @@
+export { ChannelRepo } from './channel'

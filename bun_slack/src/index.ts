@@ -1,7 +1,7 @@
 import { parseArgs } from 'node:util'
 import { color } from 'bun'
 
-import { listChannels } from './channels'
+import { ChannelsAPI } from './api'
 
 const displayHelp = (showHeader = true) => {
   if (showHeader) {
@@ -54,6 +54,7 @@ try {
     displayHelp()
   }
 
+  // LIST
   if (values.list) {
     if (!values.type) {
       console.log(
@@ -62,10 +63,19 @@ try {
       )
     } else {
       if (values.type.startsWith('public')) {
-        listChannels()
+        await ChannelsAPI.listChannels('public_channel')
       }
     }
   }
+  // SYNC
+  if (values.sync) {
+      if (values.type?.startsWith('public')) {
+        await ChannelsAPI.syncChannels('public_channel')
+      }
+
+  }
+
+
 } catch (error) {
   console.log(color('red', 'ansi'), 'Error parsing input')
   displayHelp(false)
