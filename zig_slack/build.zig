@@ -22,11 +22,18 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const zqlite = b.dependency("zqlite", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    exe.linkLibC();
+    exe.linkSystemLibrary("sqlite3");
+    exe.root_module.addImport("zqlite", zqlite.module("zqlite"));
+
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
     // step when running `zig build`).
-    b.installArtifact(exe);
-
     // This *creates* a Run step in the build graph, to be executed when another
     // step is evaluated that depends on it. The next line below will establish
     // such a dependency.

@@ -1,6 +1,9 @@
-import type { SlackAPIChannelsResponse, SlackChannel } from './schemas'
-import { SlackClient } from './slack-client'
-// Load environment variables from .env file
+import { WebClient, LogLevel } from '@slack/web-api'
+
+import type { ConversationsListResponse } from '@slack/web-api'
+
+import { Channel } from './models/channel.ts'
+import type { InsertChannel } from './models/types.ts'
 
 async function main() {
   const token = process.env.SLACK_TOKEN
@@ -8,22 +11,37 @@ async function main() {
   if (!token) {
     throw new Error('SLACK_TOKEN environment variable is required')
   }
-  const slack = new SlackClient({ token })
+  const webClient = new WebClient(token, {
+    // logLevel: LogLevel.DEBUG,
+    logLevel: LogLevel.INFO,
+  })
 
-  try {
-    // Example: List channels
-    const response: SlackAPIChannelsResponse = await slack.listChannels()
-    const channelInfo = response.channels.map((channel: SlackChannel) => ({
-      name: channel.name,
-      numUsers: channel.num_members,
-    }))
-    console.log('Channels:', channelInfo)
+  const channelsResponse: ConversationsListResponse =
+    await webClient.conversations.list({ types: 'public_channel' })
 
-    // Example: Get user info
-    const userInfo = await slack.getUserInfo('U02M3TMTV9B')
-    console.log('User info:', userInfo)
-  } catch (error: unknown) {
-    console.error('Error:', (error as Error).message)
+  if (channelsResponse.channels) {
+    for (const channel of channelsResponse.channels) {
+      const createdTs = new Date(Number(channel.created) * 1000)
+      const updatedTs = new Date(Number(channel.updated))
+
+      const channelData: InsertChannel = {
+        id: channel.id,
+        name: channel.name,
+        type: 'public_channel',
+        createdTs: createdTs,
+        updatedTs: updatedTs,
+        created: createdTs.toISOString(),
+        updated: updatedTs.toISOString(),
+        body: channel,
+      }
+
+      try {
+        const result = await Channel.insertChannel(channelData)
+        console.log(`Channel ${channel.name} inserted with ID: ${result}`)
+      } catch (error) {
+        console.error(`Error inserting channel ${channel.name}:`, error)
+      }
+    }
   }
 }
 

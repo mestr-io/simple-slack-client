@@ -1,7 +1,7 @@
 const Topic = struct { value: []const u8, creator: []const u8, last_set: u32 };
 const Purpose = struct { value: []const u8, creator: []const u8, last_set: u32 };
 const ResponseMetadata = struct { next_cursor: []const u8 };
-const Channel = struct {
+pub const Channel = struct {
     id: []const u8,
     name: []const u8,
     is_channel: bool,
@@ -38,7 +38,7 @@ pub const UserProfile = struct {
     real_name_normalized: []const u8,
     display_name: []const u8,
     display_name_normalized: []const u8,
-    fields: ?[]const u8,  // This is null in the response
+    fields: ?[]const u8, // This is null in the response
     status_text: []const u8,
     status_emoji: []const u8,
     status_emoji_display_info: [][]const u8,
