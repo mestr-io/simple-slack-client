@@ -1,48 +1,72 @@
-import { WebClient, LogLevel } from '@slack/web-api'
+import { parseArgs } from 'node:util'
+import { color } from 'bun'
 
-import type { ConversationsListResponse } from '@slack/web-api'
+import { listChannels } from './channels'
 
-import { Channel } from './models/channel.ts'
-import type { InsertChannel } from './models/types.ts'
-
-async function main() {
-  const token = process.env.SLACK_TOKEN
-
-  if (!token) {
-    throw new Error('SLACK_TOKEN environment variable is required')
+const displayHelp = (showHeader = true) => {
+  if (showHeader) {
+    console.log(color('green', 'ansi'), 'B·A·L·E·N·A')
+    console.log(
+      color('black', 'ansi'),
+      'Manage data from your slack integration. Sync all your data locally',
+    )
   }
-  const webClient = new WebClient(token, {
-    // logLevel: LogLevel.DEBUG,
-    logLevel: LogLevel.INFO,
+  const commands = `
+--help      Help
+--list      List current type on local DB
+--type      Sets type to work on
+--sync      Syncs current type from API to local DB
+--id        Sets current id of the entity
+`
+
+  console.log(color('black', 'ansi'), commands)
+}
+
+try {
+  const { values } = parseArgs({
+    args: Bun.argv,
+    options: {
+      help: {
+        type: 'boolean',
+        short: 'h',
+      },
+      list: {
+        type: 'boolean',
+        short: 'l',
+      },
+      sync: {
+        type: 'boolean',
+        short: 's',
+      },
+      type: {
+        type: 'string',
+        short: 't',
+      },
+      id: {
+        type: 'string',
+      },
+    },
+    strict: true,
+    allowPositionals: true,
   })
 
-  const channelsResponse: ConversationsListResponse =
-    await webClient.conversations.list({ types: 'public_channel' })
+  if (values.help) {
+    displayHelp()
+  }
 
-  if (channelsResponse.channels) {
-    for (const channel of channelsResponse.channels) {
-      const createdTs = new Date(Number(channel.created) * 1000)
-      const updatedTs = new Date(Number(channel.updated))
-
-      const channelData: InsertChannel = {
-        id: channel.id,
-        name: channel.name,
-        type: 'public_channel',
-        createdTs: createdTs,
-        updatedTs: updatedTs,
-        created: createdTs.toISOString(),
-        updated: updatedTs.toISOString(),
-        body: channel,
-      }
-
-      try {
-        const result = await Channel.insertChannel(channelData)
-        console.log(`Channel ${channel.name} inserted with ID: ${result}`)
-      } catch (error) {
-        console.error(`Error inserting channel ${channel.name}:`, error)
+  if (values.list) {
+    if (!values.type) {
+      console.log(
+        color('red', 'ansi'),
+        'Need the entity type to list e.g --type public_channel',
+      )
+    } else {
+      if (values.type.startsWith('public')) {
+        listChannels()
       }
     }
   }
+} catch (error) {
+  console.log(color('red', 'ansi'), 'Error parsing input')
+  displayHelp(false)
 }
-
-main()

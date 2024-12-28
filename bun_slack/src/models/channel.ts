@@ -10,4 +10,17 @@ const insertChannel = async (channelData: InsertChannel) => {
   return id
 }
 
-export const Channel = { insertChannel }
+const listChannels = async () => {
+  const result = await db
+    .select({
+      id: channel.id,
+      name: channel.name,
+      created: channel.created,
+      updated: channel.updated,
+    })
+    .from(channel)
+
+  return result
+}
+
+export const Channel = { insertChannel, listChannels }
