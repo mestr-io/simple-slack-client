@@ -7,14 +7,16 @@ import type { InsertChannel } from '../models'
 
 const insertChannel = async (channelData: InsertChannel) => {
   const result = await db.insert(channel).values(channelData).returning()
-  const { id } = result[0]
-
-  return id
+  return result[0].id
 }
 
 const updateChannel = async (channelData: InsertChannel) => {
-  const { id, ...updatedChannelData} = channelData
-  const result = await db.update(channel).set(updatedChannelData).where(eq(channel.id, id)).returning()
+  const { id, ...updatedChannelData } = channelData
+  const result = await db
+    .update(channel)
+    .set(updatedChannelData)
+    .where(eq(channel.id, id))
+    .returning()
 
   return result[0].id
 }
@@ -34,4 +36,4 @@ const listChannels = async (type: string) => {
   return result
 }
 
-export const ChannelRepo = { insertChannel, listChannels, updateChannel}
+export const ChannelRepo = { insertChannel, listChannels, updateChannel }
