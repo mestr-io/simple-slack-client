@@ -3,7 +3,7 @@ import { color } from 'bun'
 
 interface Command {
   command: 'help' | 'list' | 'sync'
-  type?: 'public' | 'private' | 'dm'
+  type?: 'public' | 'private' | 'dm' | 'users'
   id?: string
 }
 
@@ -49,6 +49,7 @@ export const cliArgs = (): Command | undefined => {
         },
         id: {
           type: 'string',
+          short: 'i',
         },
       },
       strict: true,
@@ -70,12 +71,21 @@ export const cliArgs = (): Command | undefined => {
         if (values.type.startsWith('public')) {
           return { command: 'list', type: 'public' }
         }
+        if (values.type.startsWith('private')) {
+          return { command: 'list', type: 'private' }
+        }
+        if (values.type.startsWith('user')) {
+          return { command: 'list', type: 'users', id: values.id }
+        }
       }
     }
     // SYNC
     if (values.sync) {
       if (values.type?.startsWith('public')) {
         return { command: 'sync', type: 'public' }
+      }
+      if (values.type?.startsWith('user')) {
+        return { command: 'sync', type: 'users', id: values.id }
       }
     }
   } catch (error) {

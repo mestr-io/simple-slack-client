@@ -10,3 +10,13 @@ export const channel = sqliteTable('channels', {
   updated: text(),
   body: text({ mode: 'json' }),
 })
+
+export const user = sqliteTable('users', {
+  id: text().unique(),
+  teamId: text(),
+  name: text(),
+  realName: text(),
+  updatedTs: integer({ mode: 'timestamp' }),
+  updated: text(),
+  body: text({ mode: 'json' }),
+})

@@ -67,17 +67,14 @@ const syncChannels = async (channelType: string) => {
       const result = await ChannelRepo.updateChannel(channelData)
       console.log(`Channel ${channel.name} updated with ID: ${result}`)
     }
-  
 
     console.log(`Total channels from API: ${channelsResponse.channels.length}`)
     console.log(`Total channels to create: ${newChannels.length}`)
     console.log(`Total channels to update: ${updatedChannels.length}`)
-
   }
 }
 
 const listChannels = async (type: string) => {
-  // console.log('TYPE', type)
   const result = await ChannelRepo.listChannels(type)
   console.log(result)
 }

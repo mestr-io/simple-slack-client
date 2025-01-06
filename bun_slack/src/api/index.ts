@@ -12,3 +12,4 @@ export const webClient = new WebClient(token, {
 })
 
 export { ChannelsAPI } from './channels.ts'
+export { UsersAPI } from './users.ts'
